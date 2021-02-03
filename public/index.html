@@ -128,14 +128,13 @@
                     txt += "<tr><th>Player</th>"
                     txt += "<th>Operation-Count</th></tr>"
 
-                    for (var i = 0; i < obj.operations.length; i++) {
-                        var operation = obj.operations[i];
+                    for (var key in obj) {
                         txt += "<tr>"
                         txt += "<td>"
-                        txt += operation.name
+                        txt += key
                         txt += "</td>"
                         txt += "<td>"
-                        txt += operation.count
+                        txt += obj[key]
                         txt += "</td>"
                         txt += "</tr>"
                     }

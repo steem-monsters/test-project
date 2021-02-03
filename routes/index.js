@@ -8,7 +8,7 @@ const { json } = require('express');
 const hive = new Hive();
 
 ops = new Map()
-//users = {}
+users = new Map()
 
 hive.stream({
   on_op: onOperation,
@@ -25,7 +25,7 @@ function onOperation(op, block_num, block_id, previous, transaction_id, block_ti
   //console.log(`Received operation: ${JSON.stringify(op)}`);
   //console.log('Got an op')
   var data = {
-    name: JSON.stringify(op[1].required_posting_auths),
+    name: JSON.stringify(op[1].required_posting_auths[0]),
     id: op[1].id,
   }
 
@@ -46,15 +46,14 @@ function onOperation(op, block_num, block_id, previous, transaction_id, block_ti
     ops.set(data.id, 1)
   }
 
+  if (users.has(data.name)) {
+    count = users.get(data.name)
+    count++
+    users.set(data.name, count)
+  } else {
+    users.set(data.name, 1)
+  }
 
-  // if (data.name in users) {
-  //   users[data.name].push(data.id)
-  // } else {
-  //   // var user_ops = new Set()
-  //   // user_ops.add('foo')
-  //   users[data.name] = []
-  //   users[data.name].push(data.id)
-  // }
 }
 
 router.get('/', function (req, res, next) {
@@ -67,20 +66,10 @@ router.get('/operations', function (req, res, next) {
 });
 
 router.get('/players', function (req, res, next) {
-  randCount = Math.floor(Math.random() * 6) + 1
 
-  res.json(JSON.stringify({
-    "operations": [
-      {
-        "name": "Tim",
-        "count": randCount.toString()
-      },
-      {
-        "name": "Bob",
-        "count": "27"
-      }
-    ],
-  }))
+  const obj = Object.fromEntries(users);
+  res.json(JSON.stringify(obj))
+
 });
 
 
