@@ -7,69 +7,65 @@ const { json } = require('express');
 
 const hive = new Hive();
 
-var ops = new Map()
-var users = new Map()
-var userOperations = new Map()
+const blockOperations = new Map()
+const blockUsers = new Map()
+const blockUserOperations = new Map()
 
+/*
+* TODO: Could pause and resume with load/save, but probably worth statying
+* in sync.
+*/
 hive.stream({
   on_op: onOperation,
   save_state: () => null,
   load_state: () => null
 });
 
+// TODO: Error checking/handling
 function onOperation(op, block_num, block_id, previous, transaction_id, block_time) {
+
   // Filter out any operations not related to Splinterlands
   if (op[0] != 'custom_json' || !op[1].id.startsWith(config.operation_prefix))
     return;
 
-  //console.log(`Received operation: ${JSON.stringify(op.app)}`);
-  //console.log(`Received operation: ${JSON.stringify(op)}`);
-  //console.log('Got an op')
-  var data = {
-    name: op[1].required_posting_auths[0],
-    id: op[1].id,
-  }
+  //TODO: Extrnalize data to a model.
 
-  var opData = {
+  //Parse data out of op
+  const opData = {
+    opName: op[1].required_posting_auths[0],
     id: op[1].id,
     time: block_time,
     blockNum: block_num,
     tid: transaction_id
   }
 
-  //console.log(`Received operation: ${JSON.stringify(op)}`);
+  //Load data into "models"
 
-  // if (!data.name.includes("bot")) {
-  //   return
-  // }
-
-  //if (data.name !== 'RECRUIT_18005')
-  //  return;
-
-  if (ops.has(data.id)) {
-    count = ops.get(data.id)
+  if (blockOperations.has(opData.id)) {
+    count = blockOperations.get(opData.id)
     count++
-    ops.set(data.id, count)
+    blockOperations.set(opData.id, count)
   } else {
-    ops.set(data.id, 1)
+    blockOperations.set(opData.id, 1)
   }
 
-  if (users.has(data.name)) {
-    count = users.get(data.name)
+  //TODO: Undefined is getting into this model, figure out why
+  if (blockUsers.has(opData.opName)) {
+    count = blockUsers.get(opData.opName)
     count++
-    users.set(data.name, count)
+    blockUsers.set(opData.opName, count)
   } else {
-    users.set(data.name, 1)
+    blockUsers.set(opData.opName, 1)
   }
 
-  if (userOperations.has(data.name)) {
-    userOps = userOperations.get(data.name)
+  if (blockUserOperations.has(opData.opName)) {
+    userOps = blockUserOperations.get(opData.opName)
     userOps.push(opData)
-    userOperations.set(data.name, userOps)
+    blockUserOperations.set(opData.opName, userOps)
   } else {
     dat = new Array()
     dat.push(opData)
-    userOperations.set(data.name, dat)
+    blockUserOperations.set(opData.opName, dat)
   }
 
 }
@@ -78,27 +74,27 @@ router.get('/', function (req, res, next) {
   res.render("index.html")
 });
 
+// TODO: Error checking/handling
 router.get('/operations', function (req, res, next) {
-  const obj = Object.fromEntries(ops);
+  const obj = Object.fromEntries(blockOperations);
   res.json(JSON.stringify(obj))
 });
 
+// TODO: Error checking/handling
 router.get('/players', function (req, res, next) {
-
-  const obj = Object.fromEntries(users);
+  const obj = Object.fromEntries(blockUsers);
   res.json(JSON.stringify(obj))
-
 });
 
+// TODO: Error checking/handling, sanatize data
+router.get('/playerStats/:userName', function (req, res, next) {
 
-router.get('/playerStats/:param1', function (req, res, next) {
-  player = req.params.param1
+  const player = req.params.userName
 
-  if (userOperations.has(player)) {
-    uops = userOperations.get(player)
-    const obj = JSON.stringify(uops);
-    data = {
-      "operations": uops
+  if (blockUserOperations.has(player)) {
+    const userOperations = blockUserOperations.get(player)
+    const data = {
+      "operations": userOperations
     }
     res.json(JSON.stringify(data))
   } else {

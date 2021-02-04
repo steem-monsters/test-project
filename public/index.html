@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 
+    <!-- TODO: Externalize styles -->
     <style>
         div.ex1 {
             background-color: lightblue;
@@ -45,15 +47,15 @@
 
 </head>
 
+<!-- TODO: Rudimentary user interface. Improve as needed. -->
+
 <body onload=loadResources()>
     Hello cruel world!! Let's do this!
 
     <h2>Operations in stream</h2>
     <p id="operations-table"></p>
-
     <p></p>
     <p></p>
-
 
     <h2>Players in stream</h2>
     <div class="ex1">
@@ -63,7 +65,6 @@
     <button type="button" onclick="loadResources()">Refresh</button>
 
     <h2>Player stats</h2>
-
     <label for="fname">Player name:</label>
     <input type="text" id="player-name" name="fname"><br><br>
     <button type="button" onclick="loadPlayerStats()">Load</button>
@@ -74,12 +75,18 @@
 
 <script>
 
+    //TODO: Review/improve error handling overall.
+
+    //TODO: Improve code DRYness
+
+    // Load resources an update DOM
     function loadResources() {
         loadOpertionsTable()
         loadPlayers()
     }
 
 
+    // Fetch data to fill the operations table (op, count)
     function loadOpertionsTable() {
         fetch('./operations').then(
             function (response) {
@@ -89,7 +96,7 @@
                     return;
                 }
 
-                // Examine the text in the response
+                // Pull data out of response and format as a table
                 response.json().then(function (data) {
 
                     obj = JSON.parse(data)
@@ -111,6 +118,7 @@
 
                     txt += "</table>"
 
+                    //Update the DOM with the table
                     document.getElementById("operations-table").innerHTML = txt
                 });
             }
@@ -120,6 +128,7 @@
 
     }
 
+    // Fetch data to fill the players table (player, count)
     function loadPlayers() {
         fetch('./players').then(
             function (response) {
@@ -129,7 +138,7 @@
                     return;
                 }
 
-                // Examine the text in the response
+                // Pull data out of response and format as a table
                 response.json().then(function (data) {
 
                     obj = JSON.parse(data)
@@ -160,7 +169,7 @@
 
     }
 
-
+    // Fetch data to load the ops for a given username
     function loadPlayerStats() {
         playerName = document.getElementById("player-name").value;
         url = './playerStats/' + playerName
@@ -172,7 +181,7 @@
                     return;
                 }
 
-                // Examine the text in the response
+                // Pull data out of response and format as a table
                 response.json().then(function (data) {
 
                     obj = JSON.parse(data)
@@ -203,7 +212,7 @@
                             txt += "</tr>"
                         }
                         txt += "</table>"
-                    } else {
+                    } else { //user was not found / had no tx
                         txt = "<p>No data</p>"
                     }
 
