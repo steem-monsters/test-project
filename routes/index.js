@@ -105,4 +105,10 @@ router.get('/playerStats/:userName', function (req, res, next) {
   }
 });
 
+/* TODO: Add ...
+* 1. Unit Tests!
+* 2. Top n operations
+* 3. Top n users
+*/
+
 module.exports = router;
