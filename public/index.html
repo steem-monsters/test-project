@@ -10,7 +10,7 @@
         div.ex1 {
             background-color: lightblue;
             width: 770px;
-            height: 440px;
+            height: 330px;
             overflow: scroll;
         }
 
@@ -38,7 +38,7 @@
             padding-top: 12px;
             padding-bottom: 12px;
             text-align: left;
-            background-color: #4CAF50;
+            background-color: #964caf;
             color: white;
         }
     </style>
@@ -176,33 +176,36 @@
                 response.json().then(function (data) {
 
                     obj = JSON.parse(data)
+                    var txt = ""
 
-                    var txt = "<table id=scheme>"
-                    txt += "<tr><th>Operation</th>"
-                    txt += "<th>Time</th>"
-                    txt += "<th>Block#</th>"
-                    txt += "<th>Tid</th>"
-                    txt += "</tr>"
-
-                    for (var i = 0; i < obj.operations.length; i++) {
-                        var operation = obj.operations[i];
-                        txt += "<tr>"
-                        txt += "<td>"
-                        txt += operation.name
-                        txt += "</td>"
-                        txt += "<td>"
-                        txt += operation.time
-                        txt += "</td>"
-                        txt += "<td>"
-                        txt += operation.blocknum
-                        txt += "</td>"
-                        txt += "<td>"
-                        txt += operation.tid
-                        txt += "</td>"
+                    if (obj.operations.length > 0) {
+                        txt += "<table name=mytable, id=scheme>"
+                        txt += "<tr><th>Operation</th>"
+                        txt += "<th>Time</th>"
+                        txt += "<th>Block#</th>"
+                        txt += "<th>Tid</th>"
                         txt += "</tr>"
+                        for (var i = 0; i < obj.operations.length; i++) {
+                            var operation = obj.operations[i];
+                            txt += "<tr>"
+                            txt += "<td>"
+                            txt += operation.id
+                            txt += "</td>"
+                            txt += "<td>"
+                            txt += operation.time
+                            txt += "</td>"
+                            txt += "<td>"
+                            txt += operation.blockNum
+                            txt += "</td>"
+                            txt += "<td>"
+                            txt += operation.tid
+                            txt += "</td>"
+                            txt += "</tr>"
+                        }
+                        txt += "</table>"
+                    } else {
+                        txt = "<p>No data</p>"
                     }
-
-                    txt += "</table>"
 
                     document.getElementById("players-stats").innerHTML = txt
                 });

@@ -7,8 +7,9 @@ const { json } = require('express');
 
 const hive = new Hive();
 
-ops = new Map()
-users = new Map()
+var ops = new Map()
+var users = new Map()
+var userOperations = new Map()
 
 hive.stream({
   on_op: onOperation,
@@ -25,8 +26,15 @@ function onOperation(op, block_num, block_id, previous, transaction_id, block_ti
   //console.log(`Received operation: ${JSON.stringify(op)}`);
   //console.log('Got an op')
   var data = {
-    name: JSON.stringify(op[1].required_posting_auths[0]),
+    name: op[1].required_posting_auths[0],
     id: op[1].id,
+  }
+
+  var opData = {
+    id: op[1].id,
+    time: block_time,
+    blockNum: block_num,
+    tid: transaction_id
   }
 
   //console.log(`Received operation: ${JSON.stringify(op)}`);
@@ -54,6 +62,16 @@ function onOperation(op, block_num, block_id, previous, transaction_id, block_ti
     users.set(data.name, 1)
   }
 
+  if (userOperations.has(data.name)) {
+    userOps = userOperations.get(data.name)
+    userOps.push(opData)
+    userOperations.set(data.name, userOps)
+  } else {
+    dat = new Array()
+    dat.push(opData)
+    userOperations.set(data.name, dat)
+  }
+
 }
 
 router.get('/', function (req, res, next) {
@@ -75,25 +93,20 @@ router.get('/players', function (req, res, next) {
 
 router.get('/playerStats/:param1', function (req, res, next) {
   player = req.params.param1
-  //console.log(player)
-  randCount = Math.floor(Math.random() * 6) + 1
 
-  res.json(JSON.stringify({
-    "operations": [
-      {
-        "name": "op1",
-        "time": Date.now().toString(),
-        "blocknum": randCount.toString(),
-        "tid": "1",
-      },
-      {
-        "name": "op2",
-        "time": Date.now().toString(),
-        "blocknum": randCount.toString(),
-        "tid": "1",
-      }
-    ],
-  }))
+  if (userOperations.has(player)) {
+    uops = userOperations.get(player)
+    const obj = JSON.stringify(uops);
+    data = {
+      "operations": uops
+    }
+    res.json(JSON.stringify(data))
+  } else {
+    data = {
+      "operations": ""
+    }
+    res.json(JSON.stringify(data))
+  }
 });
 
 module.exports = router;
